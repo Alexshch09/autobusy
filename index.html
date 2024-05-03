@@ -41,7 +41,7 @@
                             <h2 class="accordion-header">
                                 <button class="accordion-button" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                    Pozycja Akordeonu #1
+                                    Wybierz Wyswietlane Autobusy:
                                 </button>
                             </h2>
                             <div id="collapseOne" class="accordion-collapse collapse show"
@@ -491,39 +491,92 @@
         }
 
         async function createLineButtons() {
-            const linesData = await fetchLinesData();
-            const selectedLines = getSelectedLinesFromCookie();
-            const accordionBody = document.querySelector('.accordion-body');
-            document.getElementsByClassName('accordion-body').innerHTML = '';
+    const linesData = await fetchLinesData();
+    const selectedLines = getSelectedLinesFromCookie();
+    const accordionBody = document.querySelector('.accordion-body');
+
+    const tramsContainer = document.createElement('div');
+
+    const AccTitle = document.createElement('h2');
+    AccTitle.textContent = 'Wybierz Wyświetlane Linie:';
+    tramsContainer.appendChild(AccTitle);
+
+    const br = document.createElement('br');
+    tramsContainer.appendChild(br);
+
+    // Фильтруем данные на трамваи и автобусы
+    const tramsData = linesData.filter(line => line.vehicle_type === 'tram');
+    const dayBusesData = linesData.filter(line => line.vehicle_type === 'bus' && line.type === 'day');
+    const nightBusesData = linesData.filter(line => line.vehicle_type === 'bus' && line.type === 'night');
+
+    // Создаем кнопки для трамваев
+    tramsContainer.classList.add('mb-3'); // Добавляем отступ для разделения кнопок
+    const tramsTitle = document.createElement('h5');
+    tramsTitle.textContent = 'Tramwaje:';
+    tramsContainer.appendChild(tramsTitle);
+    tramsData.forEach(line => {
+        const button = createButton(line, selectedLines);
+        tramsContainer.appendChild(button);
+    });
+    accordionBody.appendChild(tramsContainer);
+
+    // Создаем кнопки для дневных автобусов
+    const dayBusesContainer = document.createElement('div');
+
+    const dayBusesTitle = document.createElement('h5');
+    dayBusesTitle.textContent = 'Autobusy (Dzień):';
+    dayBusesContainer.appendChild(dayBusesTitle);
+    dayBusesData.forEach(line => {
+        const button = createButton(line, selectedLines);
+        dayBusesContainer.appendChild(button);
+    });
+
+    accordionBody.appendChild(dayBusesContainer);
+
+    // Создаем кнопки для ночных автобусов
+    const nightBusesContainer = document.createElement('div');
+
+    const nightBusesTitle = document.createElement('h5');
+    nightBusesTitle.textContent = 'Autobusy (Noc):';
+    nightBusesContainer.appendChild(nightBusesTitle);
+    nightBusesData.forEach(line => {
+        const button = createButton(line, selectedLines);
+        nightBusesContainer.appendChild(button);
+    });
+
+    accordionBody.appendChild(nightBusesContainer);
+
+    const hr = document.createElement('hr');
+    accordionBody.appendChild(hr);
+
+    // Добавляем кнопку "Włącz wszystko"
+    const enableAllButton = document.createElement('button');
+    enableAllButton.classList.add('btn', 'btn-primary', 'mb-2');
+    enableAllButton.textContent = 'Włącz Wszystko';
+    enableAllButton.addEventListener('click', enableAllLines);
+    accordionBody.appendChild(enableAllButton);
+
+    // Добавляем кнопку "Wyłącz wszystko"
+    const disableAllButton = document.createElement('button');
+    disableAllButton.classList.add('btn', 'btn-primary', 'mb-2', 'ms-2'); // Добавляем класс "ms-2" для отступа слева
+    disableAllButton.textContent = 'Wyłącz Wszystko';
+    disableAllButton.addEventListener('click', disableAllLines);
+    accordionBody.appendChild(disableAllButton);
+}
 
 
-
-            linesData.forEach(line => {
-                const button = document.createElement('button');
-                button.classList.add('btn', 'btn-primary', 'mb-2');
-                button.textContent = `${line.number}`;
-                button.addEventListener('click', () => toggleLine(line.number));
-                if (selectedLines.includes(line.number)) {
-                    button.classList.add('btn-success'); // Подсвечиваем зеленым, если линия выбрана
-                } else {
-                    button.classList.add('btn-danger'); // Подсвечиваем красным, если линия не выбрана
-                }
-                accordionBody.appendChild(button);
-            });
-
-            // Добавляем кнопку "Включить все"
-            const enableAllButton = document.createElement('button');
-            enableAllButton.classList.add('btn', 'btn-primary', 'mb-2');
-            enableAllButton.textContent = 'Включить все';
-            enableAllButton.addEventListener('click', enableAllLines);
-            accordionBody.appendChild(enableAllButton);
-
-            // Добавляем кнопку "Выключить все"
-            const disableAllButton = document.createElement('button');
-            disableAllButton.classList.add('btn', 'btn-primary', 'mb-2', 'ms-2'); // Добавляем класс "ms-2" для отступа слева
-            disableAllButton.textContent = 'Выключить все';
-            disableAllButton.addEventListener('click', disableAllLines);
-            accordionBody.appendChild(disableAllButton);
+        // Создаем кнопку для линии
+        function createButton(line, selectedLines) {
+            const button = document.createElement('button');
+            button.classList.add('btn', 'btn-primary', 'mb-2');
+            button.textContent = `${line.number}`;
+            button.addEventListener('click', () => toggleLine(line.number));
+            if (selectedLines.includes(line.number)) {
+                button.classList.add('btn-success'); // Подсвечиваем зеленым, если линия выбрана
+            } else {
+                button.classList.add('btn-danger'); // Подсвечиваем красным, если линия не выбрана
+            }
+            return button;
         }
 
         // Функция для включения всех линий
