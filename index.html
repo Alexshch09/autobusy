@@ -13,8 +13,9 @@
     <div id="map" style="height: 900px;"></div>
 
     <script>
+        
         // Initialize Leaflet map
-        var map = L.map('map').setView([53.4289, 14.553], 12);
+        var map = L.map('map').setView([53.441, 14.563360], 18);
 
         // Add OpenStreetMap tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -92,7 +93,7 @@
         var vehicleMarkers = L.layerGroup().addTo(map);
 
         // Update vehicle positions every 20 seconds
-        setInterval(addVehicleMarkers, 20000);
+        setInterval(addVehicleMarkers, 10000);
 
     </script>
 
