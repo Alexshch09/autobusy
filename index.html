@@ -18,24 +18,24 @@
 <body>
     <nav class="navbar navbar-light bg-light">
         <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1"><i class="fa-solid fa-bus"></i>   |   Autobusy Szczecin</span>
+            <span class="navbar-brand mb-0 h1"><i class="fa-solid fa-bus"></i> | Autobusy Szczecin</span>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#settingsModal">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
     </nav>
-    
+
 
     <!-- Modal -->
     <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="settingsModalLabel">Map Settings</h5>
+                    <h5 class="modal-title" id="settingsModalLabel">Ustawienia mapy</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Map type radio buttons -->
+                    <!-- Przyciski wyboru typu mapy -->
                     <div>
                         <label>
                             <input type="radio" name="mapType" value="thunderforest"> Thunderforest
@@ -45,19 +45,23 @@
                         </label>
                     </div>
                     <br>
-                    <!-- API Key input -->
+                    <!-- Pole wprowadzania klucza API -->
                     <div>
-                        <label for="apiKey">API Key:</label>
+                        <label for="apiKey">Klucz API:</label>
                         <input type="text" id="apiKey">
-                        <button onclick="saveApiKey()">Save</button>
+                        <button onclick="saveApiKey()">Zapisz</button>
                     </div>
+                    <br><br>
+                    <div>Ta aplikacja zapewnia śledzenie na żywo autobusów i tramwajów w Szczecinie.<br><br>Dla więcej informacji lub aby przyczynić się, odwiedź: <br> <a href="https://github.com/Alexshch09/autobusy" target="_blank">https://github.com/Alexshch09/autobusy</a></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
                 </div>
             </div>
         </div>
     </div>
+    
+    
     <div style="height: 92vh;">
         <div id="map" style="height: 100%;"></div>
     </div>
@@ -179,6 +183,41 @@
             }
         }
 
+        // Function to add markers for vehicles to the map
+        async function addVehicleMarkers() {
+            const vehicleData = await fetchVehicleData();
+            if (vehicleData) {
+                // Clear previous vehicle markers from the map
+                vehicleMarkers.clearLayers();
+
+                vehicleData.forEach(vehicle => {
+                    var customIcon;
+                    if (vehicle.vehicle_type === "bus") {
+                        customIcon = L.divIcon({
+                            className: 'bus-icon',
+                            html: `<div>${vehicle.line_number}</div>`
+                        });
+                    } else if (vehicle.vehicle_type === "tram") {
+                        customIcon = L.divIcon({
+                            className: 'tram-icon',
+                            html: `<div>${vehicle.line_number}</div>`
+                        });
+                    }
+
+                    // Create marker with custom icon for each vehicle
+                    var marker = L.marker([vehicle.latitude, vehicle.longitude], {
+                        icon: customIcon
+                    }).addTo(vehicleMarkers);
+
+                    // Add tooltip or popup to show next stop information
+                    var nextStopInfo = vehicle.next_stop ? vehicle.next_stop : "Unknown";
+                    marker.bindTooltip(`Next Stop: ${nextStopInfo}`);
+                    // If you want to use popup instead of tooltip, use marker.bindPopup() instead.
+                });
+            }
+        }
+
+
         // Call functions to add vehicle markers initially
         addVehicleMarkers();
 
@@ -198,7 +237,7 @@
             background-color: rgb(77, 77, 243);
             color: white;
             border-radius: 50%;
-            padding: 8px;
+            padding: 12px;
             text-align: center;
             width: 30px;
             height: 30px;
@@ -209,11 +248,18 @@
             background-color: rgb(184, 13, 184);
             color: white;
             border-radius: 50%;
-            padding: 8px;
+            padding: 12px;
             text-align: center;
             width: 30px;
             height: 30px;
             line-height: 15px;
+        }
+
+        .bus-icon,
+        .tram-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .stop-icon {
