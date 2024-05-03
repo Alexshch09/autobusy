@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vehicle Map</title>
-    <!-- Leaflet CSS -->
+    <title>Mapa Pojazdów</title>
+    <!-- Styl Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <!-- Leaflet JavaScript -->
+    <!-- Skrypt Leaflet -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 </head>
@@ -41,18 +41,12 @@
                             <h2 class="accordion-header">
                                 <button class="accordion-button" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                    Accordion Item #1
+                                    Pozycja Akordeonu #1
                                 </button>
                             </h2>
                             <div id="collapseOne" class="accordion-collapse collapse show"
                                 data-bs-parent="#accordionExample">
                                 <div class="accordion-body">
-                                    <strong>This is the first item's accordion body.</strong> It is shown by default,
-                                    until the collapse plugin adds the appropriate classes that we use to style each
-                                    element. These classes control the overall appearance, as well as the showing and
-                                    hiding via CSS transitions. You can modify any of this with custom CSS or overriding
-                                    our default variables. It's also worth noting that just about any HTML can go within
-                                    the <code>.accordion-body</code>, though the transition does limit overflow.
                                 </div>
                             </div>
                         </div>
@@ -60,18 +54,12 @@
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                    Accordion Item #2
+                                    Pozycja Akordeonu #2
                                 </button>
                             </h2>
                             <div id="collapseTwo" class="accordion-collapse collapse"
                                 data-bs-parent="#accordionExample">
                                 <div class="accordion-body">
-                                    <strong>This is the second item's accordion body.</strong> It is hidden by default,
-                                    until the collapse plugin adds the appropriate classes that we use to style each
-                                    element. These classes control the overall appearance, as well as the showing and
-                                    hiding via CSS transitions. You can modify any of this with custom CSS or overriding
-                                    our default variables. It's also worth noting that just about any HTML can go within
-                                    the <code>.accordion-body</code>, though the transition does limit overflow.
                                 </div>
                             </div>
                         </div>
@@ -87,12 +75,17 @@
                                 <div class="accordion-body">
                                     <!-- Przyciski wyboru typu mapy -->
                                     <div>
+                                        <h6>Wybierz Typ Mapy: </h6>
                                         <label>
-                                            <input type="radio" name="mapType" value="thunderforest"> Thunderforest
-                                        </label>
+                                            <input type="radio" name="mapType" value="thunderforest"> Vehicles Light (Potrzebujesz klucza API)
+                                        </label><br>
                                         <label>
-                                            <input type="radio" name="mapType" value="osm" checked> OpenStreetMap
-                                        </label>
+                                            <input type="radio" name="mapType" value="thunderforest_dark"> Vehicles Dark (Potrzebujesz klucza API)
+                                        </label><br>
+                                        <label>
+                                            <input type="radio" name="mapType" value="osm" checked> OpenStreetMap 
+                                        </label><br>
+                                        
                                     </div>
                                     <br>
                                     <!-- Pole wprowadzania klucza API -->
@@ -120,22 +113,53 @@
     </div>
 
 
-    <div style="height: 92vh;">
+    <div style="height: 94vh;">
         <div id="map" style="height: 100%;"></div>
     </div>
+
 
     <script>
         var mapType = getSavedMapType() || "osm";
         var apiKey = getSavedApiKey();
+
+
+        function initMap() {
+        // Check if geolocation is supported by the browser
+        if ('geolocation' in navigator) {
+            // Request the user's location
+            navigator.geolocation.getCurrentPosition(
+                // Success callback function
+                function(position) {
+                    // Get the user's coordinates
+                    var userLat = position.coords.latitude;
+                    var userLng = position.coords.longitude;
+
+                    // Initialize the map with the user's location
+                    map.setView([userLat, userLng], 18);
+                },
+                // Error callback function
+                function(error) {
+                    console.error('Error getting user location:', error);
+                }
+            );
+        } else {
+            console.error('Geolocation is not supported by this browser.');
+        }
+    }
+
+    // Call the initMap function when the page is loaded
+    document.addEventListener('DOMContentLoaded', initMap);
+
+    
         // if (apiKey) {
         //     document.getElementById('apiKeySection').style.display = 'none';
         // }
 
 
-        // Initialize Leaflet map
+        // Inicjalizacja mapy Leaflet
         var map = L.map('map', {
-            minZoom: 12, // Минимальное уменьшение
-            maxZoom: 19 // Максимальное увеличение
+            minZoom: 12, // Minimalne przybliżenie
+            maxZoom: 19 // Maksymalne przybliżenie
         }).setView([53.441, 14.563360], 18);
 
         var southWest = L.latLng(53.6, 14.4),
@@ -153,13 +177,22 @@
         function changeTileLayer(mapType) {
             if (mapType === "thunderforest") {
                 if (!apiKey) {
-                    alert("Please provide an API key. You can get one from Thunderforest website.");
+                    alert("Proszę podać klucz API. Możesz go uzyskać na stronie Thunderforest.");
                     return;
                 }
                 tileLayer = L.tileLayer('https://a.tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=' + apiKey, {
                     maxZoom: 19,
                 });
-            } else if (mapType === "osm") {
+            } else if (mapType === "thunderforest_dark") {
+                if (!apiKey) {
+                    alert("Proszę podać klucz API. Możesz go uzyskać na stronie Thunderforest.");
+                    return;
+                }
+                tileLayer = L.tileLayer('https://a.tile.thunderforest.com/transport-dark/{z}/{x}/{y}.png?apikey=' + apiKey, {
+                    maxZoom: 19,
+                });
+            }
+            else if (mapType === "osm") {
                 tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
                 });
@@ -175,25 +208,25 @@
             document.querySelector('input[name="mapType"][value="' + mapType + '"]').checked = true;
         }
 
-        // Function to fetch vehicle data from the API
+        // Funkcja do pobierania danych pojazdów z API
         async function fetchVehicleData() {
             try {
                 const response = await fetch('https://www.zditm.szczecin.pl/api/v1/vehicles');
                 const data = await response.json();
-                return data.data; // Return only the 'data' array from the response
+                return data.data; // Zwróć tylko tablicę 'data' z odpowiedzi
             } catch (error) {
-                console.error('Error fetching vehicle data:', error);
+                console.error('Błąd podczas pobierania danych pojazdów:', error);
                 return [];
             }
         }
 
-        // Function to save API key in a cookie
+        // Funkcja do zapisywania klucza API w ciasteczku
         function saveApiKey() {
             apiKey = document.getElementById("apiKey").value;
             document.cookie = "apiKey=" + apiKey + "; expires=Infinity";
         }
 
-        // Function to get saved API key from cookie
+        // Funkcja do pobierania zapisanego klucza API z ciasteczka
         function getSavedApiKey() {
             const cookie = document.cookie.split(";").find(cookie => cookie.trim().startsWith("apiKey="));
             if (cookie) {
@@ -202,12 +235,12 @@
             return null;
         }
 
-        // Function to save map type in a cookie
+        // Funkcja do zapisywania typu mapy w ciasteczku
         function saveMapType(mapType) {
             document.cookie = "mapType=" + mapType + "; expires=Infinity";
         }
 
-        // Function to get saved map type from cookie
+        // Funkcja do pobierania zapisanego typu mapy z ciasteczka
         function getSavedMapType() {
             const cookie = document.cookie.split(";").find(cookie => cookie.trim().startsWith("mapType="));
             if (cookie) {
@@ -216,7 +249,7 @@
             return null;
         }
 
-        // Add event listener to radio buttons to change map type
+        // Dodaj nasłuchiwanie zdarzeń na przyciskach radio do zmiany typu mapy
         document.querySelectorAll('input[name="mapType"]').forEach(input => {
             input.addEventListener("change", function () {
                 mapType = this.value;
@@ -225,11 +258,11 @@
             });
         });
 
-        // Function to add markers for vehicles to the map
+        // Funkcja do dodawania znaczników dla pojazdów na mapie
         async function addVehicleMarkers() {
             const vehicleData = await fetchVehicleData();
             if (vehicleData) {
-                // Clear previous vehicle markers from the map
+                // Wyczyść poprzednie znaczniki pojazdów z mapy
                 vehicleMarkers.clearLayers();
 
                 vehicleData.forEach(vehicle => {
@@ -246,41 +279,40 @@
                         });
                     }
 
-                    // Create marker with custom icon for each vehicle
+                    // Utwórz znacznik z niestandardową ikoną dla każdego pojazdu
                     var marker = L.marker([vehicle.latitude, vehicle.longitude], {
                         icon: customIcon
                     }).addTo(vehicleMarkers);
 
-                    // Add tooltip or popup to show next stop information
-                    var nextStopInfo = vehicle.next_stop ? vehicle.next_stop : "Unknown";
-                    var directionInfo = vehicle.direction ? vehicle.direction : "Unknown";
-                    var puncInfo = vehicle.punctuality ? vehicle.punctuality : "Unknown";
-                    var velInfo = vehicle.velocity ? vehicle.velocity : "Unknown";
-                    var updateInfo = vehicle.updated_at ? new Date(vehicle.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : "Unknown";
+                    // Dodaj podpowiedź lub komunikat do wyświetlenia dodatkowych informacji
+                    var nextStopInfo = vehicle.next_stop ? vehicle.next_stop : "Nieznane";
+                    var directionInfo = vehicle.direction ? vehicle.direction : "Nieznane";
+                    var puncInfo = vehicle.punctuality ? vehicle.punctuality : "Nieznane";
+                    var velInfo = vehicle.velocity ? vehicle.velocity : "Nieznane";
+                    var updateInfo = vehicle.updated_at ? new Date(vehicle.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : "Nieznane";
                     marker.bindTooltip(
-                        `Next Stop: ${nextStopInfo}
+                        `Następny Przystanek: ${nextStopInfo}
                         <br>
-                        Direction: ${directionInfo}
+                        Kierunek: ${directionInfo}
                         <br>
-                        Punctuality: ${puncInfo}
+                        Punktualność: ${puncInfo}
                         <br>
-                        Velocity: ${velInfo} km/h
+                        Prędkość: ${velInfo} km/h
                         <br>
-                        Last Update: ${updateInfo}`
+                        Ostatnia Aktualizacja: ${updateInfo}`
                     );
-                    // If you want to use popup instead of tooltip, use marker.bindPopup() instead.
                 });
             }
         }
 
 
-        // Call functions to add vehicle markers initially
+        // Wywołaj funkcje do początkowego dodawania znaczników pojazdów
         addVehicleMarkers();
 
-        // Create a layer group for vehicle markers
+        // Utwórz grupę warstw dla znaczników pojazdów
         var vehicleMarkers = L.layerGroup().addTo(map);
 
-        // Update vehicle positions every 20 seconds
+        // Aktualizuj pozycje pojazdów co 20 sekund
         setInterval(addVehicleMarkers, 20000);
 
     </script>
