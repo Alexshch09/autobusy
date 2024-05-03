@@ -364,9 +364,14 @@
                 const stopLatLng = L.latLng(stop.latitude, stop.longitude);
                 if (mapBounds.contains(stopLatLng)) {
                     const marker = L.marker(stopLatLng).addTo(busStopLayer);
-                    console.log(stop.number)
-                    const stopnum = stop.number
-                    marker.bindPopup(`<button type="button" id="open_stop_modal" class="btn btn-primary" data-bs-toggle="modal" data-stop-number="${stopnum}" data-bs-target="#departureModal">Pokaż odjazdy</button>`);
+                    
+                    marker.bindPopup(`
+                <div>
+                    <p>Numer przystanku: ${stop.number}</p>
+                    <p>Na żądanie: ${stop.request_stop ? 'Tak' : 'Nie'}</p>
+                    <p>Parking: ${stop.park_and_ride ? 'Tak' : 'Nie'}</p>
+                    <button type="button" id="open_stop_modal" class="btn btn-primary" data-bs-toggle="modal" data-stop-number="${stop.number}" data-bs-target="#departureModal">Pokaż odjazdy</button>
+                </div>`);
                 }
             });
         }
@@ -430,18 +435,7 @@
             }
         });
 
-        // Trigger fetchAndPopulateDepartures when modal is shown
-        const departureModal = document.getElementById('departureModal');
-        departureModal.addEventListener('show.bs.modal', function (event) {
-            console.log(event.target);
-            if (event.target.matches('[data-stop-number]')) {
-                console.log('Matches');
-                // Pobierz numer przystanku z atrybutu danych
-                const stopNumber = event.target.getAttribute('data-stop-number');
-                // Wywołaj funkcję, aby pobrać i wyświetlić odjazdy dla tego przystanku
-                fetchAndPopulateDepartures(stopNumber);
-            }
-        });
+        
 
         // Wywołaj funkcje do początkowego dodawania znaczników pojazdów
         addVehicleMarkers();
