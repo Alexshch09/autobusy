@@ -130,8 +130,7 @@
                             <tr>
                                 <th>Numer linii</th>
                                 <th>Kierunek</th>
-                                <th>Rzeczywisty czas odjazdu</th>
-                                <th>Rozkładowy czas odjazdu</th>
+                                <th>Czas odjazdu</th>
                             </tr>
                         </thead>
                         <tbody id="departureTableBody">
@@ -405,12 +404,15 @@
 
                 // Populate table with departures
                 data.departures.forEach(departure => {
+                    const realTime = departure.time_real !== null ? departure.time_real + ' min' : '';
+                    const scheduledTime = departure.time_scheduled !== null ? departure.time_scheduled : '';
+
                     const row = `<tr>
-                        <td>${departure.line_number}</td>
-                        <td>${departure.direction}</td>
-                        <td>${departure.time_real !== null ? departure.time_real + ' min' : '-'}</td>
-                        <td>${departure.time_scheduled !== null ? departure.time_scheduled : '-'}</td>
-                      </tr>`;
+                <td>${departure.line_number}</td>
+                <td>${departure.direction}</td>
+                <td>${realTime} ${scheduledTime}</td>
+            </tr>`;
+
                     document.getElementById('departureTableBody').innerHTML += row;
                 });
             } catch (error) {
