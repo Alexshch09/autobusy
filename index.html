@@ -77,15 +77,17 @@
                                     <div>
                                         <h6>Wybierz Typ Mapy: </h6>
                                         <label>
-                                            <input type="radio" name="mapType" value="thunderforest"> Vehicles Light (Potrzebujesz klucza API)
+                                            <input type="radio" name="mapType" value="thunderforest"> Vehicles Light
+                                            (Potrzebujesz klucza API)
                                         </label><br>
                                         <label>
-                                            <input type="radio" name="mapType" value="thunderforest_dark"> Vehicles Dark (Potrzebujesz klucza API)
+                                            <input type="radio" name="mapType" value="thunderforest_dark"> Vehicles Dark
+                                            (Potrzebujesz klucza API)
                                         </label><br>
                                         <label>
-                                            <input type="radio" name="mapType" value="osm" checked> OpenStreetMap 
+                                            <input type="radio" name="mapType" value="osm" checked> OpenStreetMap
                                         </label><br>
-                                        
+
                                     </div>
                                     <br>
                                     <!-- Pole wprowadzania klucza API -->
@@ -113,6 +115,35 @@
     </div>
 
 
+    <!-- Modal -->
+    <div class="modal fade" id="departureModal" tabindex="-1" aria-labelledby="departureModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="departureModalLabel">Tablica odjazdów dla przystanku <span
+                            id="stopName"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Numer linii</th>
+                                <th>Kierunek</th>
+                                <th>Rzeczywisty czas odjazdu</th>
+                                <th>Rozkładowy czas odjazdu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="departureTableBody">
+                            <!-- Dynamic content will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <div style="height: 93vh;">
         <div id="map" style="height: 100%;"></div>
     </div>
@@ -123,37 +154,34 @@
         var apiKey = getSavedApiKey();
 
 
+
         function initMap() {
-        // Check if geolocation is supported by the browser
-        if ('geolocation' in navigator) {
-            // Request the user's location
-            navigator.geolocation.getCurrentPosition(
-                // Success callback function
-                function(position) {
-                    // Get the user's coordinates
-                    var userLat = position.coords.latitude;
-                    var userLng = position.coords.longitude;
+            // Check if geolocation is supported by the browser
+            if ('geolocation' in navigator) {
+                // Request the user's location
+                navigator.geolocation.getCurrentPosition(
+                    // Success callback function
+                    function (position) {
+                        // Get the user's coordinates
+                        var userLat = position.coords.latitude;
+                        var userLng = position.coords.longitude;
 
-                    // Initialize the map with the user's location
-                    map.setView([userLat, userLng], 18);
-                },
-                // Error callback function
-                function(error) {
-                    console.error('Error getting user location:', error);
-                }
-            );
-        } else {
-            console.error('Geolocation is not supported by this browser.');
+                        // Initialize the map with the user's location
+                        map.setView([userLat, userLng], 18);
+                    },
+                    // Error callback function
+                    function (error) {
+                        console.error('Error getting user location:', error);
+                    }
+                );
+            } else {
+                console.error('Geolocation is not supported by this browser.');
+            }
         }
-    }
 
-    // Call the initMap function when the page is loaded
-    document.addEventListener('DOMContentLoaded', initMap);
+        // Call the initMap function when the page is loaded
+        document.addEventListener('DOMContentLoaded', initMap);
 
-
-        // if (apiKey) {
-        //     document.getElementById('apiKeySection').style.display = 'none';
-        // }
 
 
         // Inicjalizacja mapy Leaflet
@@ -305,6 +333,113 @@
             }
         }
 
+
+        // Создание отдельного слоя для маркеров
+        const busStopLayer = L.layerGroup().addTo(map);
+
+        async function fetchBusStops() {
+            try {
+                const response = await fetch('https://www.zditm.szczecin.pl/api/v1/stops');
+                const data = await response.json();
+                return data.data;
+            } catch (error) {
+                console.error('Error fetching bus stops data:', error);
+                return [];
+            }
+        }
+
+        function renderVisibleBusStops(stopsData) {
+            const mapBounds = map.getBounds();
+            const zoomLevel = map.getZoom();
+            const maxZoomToShowStops = 15; // Adjust this value as needed
+
+            // Clear existing markers from the bus stop layer
+            busStopLayer.clearLayers();
+
+            if (zoomLevel <= maxZoomToShowStops) {
+                // Do not display stops if zoom level is too high
+                return;
+            }
+
+            stopsData.forEach(stop => {
+                const stopLatLng = L.latLng(stop.latitude, stop.longitude);
+                if (mapBounds.contains(stopLatLng)) {
+                    const marker = L.marker(stopLatLng).addTo(busStopLayer);
+                    console.log(stop.number)
+                    const stopnum = stop.number
+                    marker.bindPopup(`<button type="button" id="open_stop_modal" class="btn btn-primary" data-bs-toggle="modal" data-stop-number="${stopnum}" data-bs-target="#departureModal">Pokaż odjazdy</button>`);
+                }
+            });
+        }
+
+        // При изменении масштаба карты вызываем функцию для отображения видимых остановок
+        map.on('zoomend', () => {
+            renderVisibleBusStops(busStopsData);
+        });
+
+        // Обновление видимых остановок при движении карты
+        map.on('moveend', () => {
+            renderVisibleBusStops(busStopsData);
+        });
+
+        // Инициализация процесса получения данных об остановках и отображения их на карте
+        let busStopsData = [];
+        fetchBusStops().then(data => {
+            busStopsData = data;
+            renderVisibleBusStops(busStopsData);
+        }).catch(error => {
+            console.error('Error fetching bus stops data:', error);
+        });
+
+
+        async function fetchAndPopulateDepartures(stopNumber) {
+            try {
+                const response = await fetch(`https://www.zditm.szczecin.pl/api/v1/displays/${stopNumber}`);
+                const data = await response.json();
+
+                // Set stop name in modal header
+                document.getElementById('stopName').innerText = data.stop_name;
+
+                // Clear previous table rows
+                document.getElementById('departureTableBody').innerHTML = '';
+
+                // Populate table with departures
+                data.departures.forEach(departure => {
+                    const row = `<tr>
+                        <td>${departure.line_number}</td>
+                        <td>${departure.direction}</td>
+                        <td>${departure.time_real !== null ? departure.time_real + ' min' : '-'}</td>
+                        <td>${departure.time_scheduled !== null ? departure.time_scheduled : '-'}</td>
+                      </tr>`;
+                    document.getElementById('departureTableBody').innerHTML += row;
+                });
+            } catch (error) {
+                console.error('Error fetching and populating departures:', error);
+            }
+        }
+
+        document.addEventListener('click', function (event) {
+            // Sprawdź, czy kliknięty element to przycisk z atrybutem danych data-stop-number
+            if (event.target.matches('[data-stop-number]')) {
+                // Pobierz numer przystanku z atrybutu danych
+                const stopNumber = event.target.getAttribute('data-stop-number');
+                // Wywołaj funkcję, aby pobrać i wyświetlić odjazdy dla tego przystanku
+                fetchAndPopulateDepartures(stopNumber);
+            }
+        });
+
+        // Trigger fetchAndPopulateDepartures when modal is shown
+        const departureModal = document.getElementById('departureModal');
+        departureModal.addEventListener('show.bs.modal', function (event) {
+            console.log(event.target);
+            if (event.target.matches('[data-stop-number]')) {
+                console.log('Matches');
+                // Pobierz numer przystanku z atrybutu danych
+                const stopNumber = event.target.getAttribute('data-stop-number');
+                // Wywołaj funkcję, aby pobrać i wyświetlić odjazdy dla tego przystanku
+                fetchAndPopulateDepartures(stopNumber);
+            }
+        });
 
         // Wywołaj funkcje do początkowego dodawania znaczników pojazdów
         addVehicleMarkers();
