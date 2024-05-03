@@ -68,26 +68,26 @@
         }
 
         // Function to add markers for stops to the map
-        async function addStopMarkers() {
-            const stopData = await fetchStopData();
-            stopData.forEach(stop => {
-                // Create custom icon for stop marker
-                var customIcon = L.divIcon({
-                    className: 'stop-icon',
-                    html: `<div>🏠</div>`, // Use a house emoji as a marker
-                    iconSize: [30, 30]
-                });
+        // async function addStopMarkers() {
+        //     const stopData = await fetchStopData();
+        //     stopData.forEach(stop => {
+        //         // Create custom icon for stop marker
+        //         var customIcon = L.divIcon({
+        //             className: 'stop-icon',
+        //             html: `<div>🏠</div>`, // Use a house emoji as a marker
+        //             iconSize: [30, 30]
+        //         });
 
-                // Add marker for each stop
-                L.marker([stop.latitude, stop.longitude], { icon: customIcon })
-                    .bindPopup(stop.name) // Display stop name on marker click
-                    .addTo(map);
-            });
-        }
+        //         // Add marker for each stop
+        //         L.marker([stop.latitude, stop.longitude], { icon: customIcon })
+        //             .bindPopup(stop.name) // Display stop name on marker click
+        //             .addTo(map);
+        //     });
+        // }
 
         // Call functions to add vehicle and stop markers initially
         addVehicleMarkers();
-        addStopMarkers();
+        // addStopMarkers();
 
         // Create a layer group for vehicle markers
         var vehicleMarkers = L.layerGroup().addTo(map);
