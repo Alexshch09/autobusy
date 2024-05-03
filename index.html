@@ -49,6 +49,9 @@
         async function addVehicleMarkers() {
             const vehicleData = await fetchVehicleData();
             if (vehicleData) {
+                // Clear previous vehicle markers from the map
+                vehicleMarkers.clearLayers();
+
                 vehicleData.forEach(vehicle => {
                     // Create custom icon with vehicle number
                     var customIcon = L.divIcon({
@@ -58,7 +61,7 @@
 
                     // Add marker with custom icon for each vehicle
                     L.marker([vehicle.latitude, vehicle.longitude], { icon: customIcon })
-                        .addTo(map);
+                        .addTo(vehicleMarkers);
                 });
             }
         }
@@ -84,6 +87,9 @@
         // Call functions to add vehicle and stop markers initially
         addVehicleMarkers();
         addStopMarkers();
+
+        // Create a layer group for vehicle markers
+        var vehicleMarkers = L.layerGroup().addTo(map);
 
         // Update vehicle positions every 20 seconds
         setInterval(addVehicleMarkers, 20000);
