@@ -52,7 +52,10 @@
                         <button onclick="saveApiKey()">Zapisz</button>
                     </div>
                     <br><br>
-                    <div>Ta aplikacja zapewnia śledzenie na żywo autobusów i tramwajów w Szczecinie.<br><br>Dla więcej informacji lub aby przyczynić się, odwiedź: <br> <a href="https://github.com/Alexshch09/autobusy" target="_blank">https://github.com/Alexshch09/autobusy</a></div>
+                    <div>Ta aplikacja zapewnia śledzenie na żywo autobusów i tramwajów w Szczecinie.<br><br>Dla więcej
+                        informacji lub aby przyczynić się, odwiedź: <br> <a
+                            href="https://github.com/Alexshch09/autobusy"
+                            target="_blank">https://github.com/Alexshch09/autobusy</a></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
@@ -60,8 +63,8 @@
             </div>
         </div>
     </div>
-    
-    
+
+
     <div style="height: 92vh;">
         <div id="map" style="height: 100%;"></div>
     </div>
@@ -73,8 +76,21 @@
         //     document.getElementById('apiKeySection').style.display = 'none';
         // }
 
+
         // Initialize Leaflet map
-        var map = L.map('map').setView([53.441, 14.563360], 18);
+        var map = L.map('map', {
+            minZoom: 12, // Минимальное уменьшение
+            maxZoom: 19 // Максимальное увеличение
+        }).setView([53.441, 14.563360], 18);
+
+        var southWest = L.latLng(53.6, 14.4),
+            northEast = L.latLng(53.225, 14.8),
+            bounds = L.latLngBounds(southWest, northEast);
+
+        map.setMaxBounds(bounds);
+        map.on('drag', function () {
+            map.panInsideBounds(bounds, { animate: false });
+        });
 
         var tileLayer;
         changeTileLayer(mapType);
