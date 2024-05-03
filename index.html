@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,11 +10,12 @@
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </head>
+
 <body>
     <div id="map" style="height: 900px;"></div>
 
     <script>
-        
+
         // Initialize Leaflet map
         var map = L.map('map').setView([53.441, 14.563360], 18);
 
@@ -54,11 +56,18 @@
                 vehicleMarkers.clearLayers();
 
                 vehicleData.forEach(vehicle => {
-                    // Create custom icon with vehicle number
-                    var customIcon = L.divIcon({
-                        className: 'vehicle-icon',
-                        html: `<div>${vehicle.line_number}</div>`
-                    });
+                    var customIcon;
+                    if (vehicle.vehicle_type === "bus") {
+                        customIcon = L.divIcon({
+                            className: 'bus-icon',
+                            html: `<div>${vehicle.line_number}</div>`
+                        });
+                    } else if (vehicle.vehicle_type === "tram") {
+                        customIcon = L.divIcon({
+                            className: 'tram-icon',
+                            html: `<div>${vehicle.line_number}</div>`
+                        });
+                    }
 
                     // Add marker with custom icon for each vehicle
                     L.marker([vehicle.latitude, vehicle.longitude], { icon: customIcon })
@@ -98,9 +107,23 @@
     </script>
 
     <style>
-        .vehicle-icon {
-            background-color: #689cd3;
-            color: #fff;
+        .bus-icon {
+            background-color: rgb(77, 77, 243);
+            /* синий цвет */
+            color: white;
+            border-radius: 50%;
+            padding: 8px;
+            text-align: center;
+            width: 30px;
+            height: 30px;
+            line-height: 15px;
+        }
+
+        /* CSS стили для иконок трамваев */
+        .tram-icon {
+            background-color: rgb(184, 13, 184);
+            /* фиолетовый цвет */
+            color: white;
             border-radius: 50%;
             padding: 8px;
             text-align: center;
@@ -115,4 +138,5 @@
         }
     </style>
 </body>
+
 </html>
