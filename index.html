@@ -153,6 +153,9 @@
         var apiKey = getSavedApiKey();
 
 
+        //-------------------------------------------------------------------------------------------------------------------------------------
+
+
 
         function initMap() {
             // Check if geolocation is supported by the browser
@@ -180,6 +183,9 @@
 
         // Call the initMap function when the page is loaded
         document.addEventListener('DOMContentLoaded', initMap);
+
+
+        //-------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -235,17 +241,10 @@
             document.querySelector('input[name="mapType"][value="' + mapType + '"]').checked = true;
         }
 
-        // Funkcja do pobierania danych pojazdów z API
-        async function fetchVehicleData() {
-            try {
-                const response = await fetch('https://www.zditm.szczecin.pl/api/v1/vehicles');
-                const data = await response.json();
-                return data.data; // Zwróć tylko tablicę 'data' z odpowiedzi
-            } catch (error) {
-                console.error('Błąd podczas pobierania danych pojazdów:', error);
-                return [];
-            }
-        }
+
+
+        //-------------------------------------------------------------------------------------------------------------------------------------
+
 
         // Funkcja do zapisywania klucza API w ciasteczku
         function saveApiKey() {
@@ -285,52 +284,95 @@
             });
         });
 
-        // Funkcja do dodawania znaczników dla pojazdów na mapie
+
+
+        //-------------------------------------------------------------------------------------------------------------------------------------
+        // Markers for buses
+        //-------------------------------------------------------------------------------------------------------------------------------------
+
+        // Funkcja do pobierania danych pojazdów z API
+        async function fetchVehicleData() {
+            try {
+                const response = await fetch('https://www.zditm.szczecin.pl/api/v1/vehicles');
+                const data = await response.json();
+                return data.data; // Zwróć tylko tablicę 'data' z odpowiedzi
+            } catch (error) {
+                console.error('Błąd podczas pobierania danych pojazdów:', error);
+                return [];
+            }
+        }
+
+        // Функция для сохранения списка включенных линий в куки
+        function saveSelectedLinesToCookie(selectedLines) {
+            document.cookie = `selectedLines=${JSON.stringify(selectedLines)}; expires=${new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString()}; path=/`;
+        }
+
+        // Функция для получения списка включенных линий из куки
+        function getSelectedLinesFromCookie() {
+            const cookies = document.cookie.split(';').map(cookie => cookie.trim());
+            const selectedLinesCookie = cookies.find(cookie => cookie.startsWith('selectedLines='));
+            if (selectedLinesCookie) {
+                return JSON.parse(selectedLinesCookie.split('=')[1]);
+            }
+            return [];
+        }
+
+        // Функция для добавления маркеров для выбранных линий
         async function addVehicleMarkers() {
             const vehicleData = await fetchVehicleData();
+            const selectedLines = getSelectedLinesFromCookie();
+
             if (vehicleData) {
                 // Wyczyść poprzednie znaczniki pojazdów z mapy
                 vehicleMarkers.clearLayers();
 
                 vehicleData.forEach(vehicle => {
-                    var customIcon;
-                    if (vehicle.vehicle_type === "bus") {
-                        customIcon = L.divIcon({
-                            className: 'bus-icon',
-                            html: `<div>${vehicle.line_number}</div>`
-                        });
-                    } else if (vehicle.vehicle_type === "tram") {
-                        customIcon = L.divIcon({
-                            className: 'tram-icon',
-                            html: `<div>${vehicle.line_number}</div>`
-                        });
+                    // Проверяем, есть ли линия в списке включенных линий
+                    if (selectedLines.includes(vehicle.line_number)) {
+                        var customIcon;
+                        if (vehicle.vehicle_type === "bus") {
+                            customIcon = L.divIcon({
+                                className: 'bus-icon',
+                                html: `<div>${vehicle.line_number}</div>`
+                            });
+                        } else if (vehicle.vehicle_type === "tram") {
+                            customIcon = L.divIcon({
+                                className: 'tram-icon',
+                                html: `<div>${vehicle.line_number}</div>`
+                            });
+                        }
+
+                        // Создаем маркер с кастомной иконкой для каждого транспортного средства
+                        var marker = L.marker([vehicle.latitude, vehicle.longitude], {
+                            icon: customIcon
+                        }).addTo(vehicleMarkers);
+
+                        // Добавляем всплывающую подсказку для отображения дополнительной информации
+                        var nextStopInfo = vehicle.next_stop ? vehicle.next_stop : "Nieznane";
+                        var directionInfo = vehicle.direction ? vehicle.direction : "Nieznane";
+                        var puncInfo = vehicle.punctuality ? vehicle.punctuality : "Nieznane";
+                        var velInfo = vehicle.velocity ? vehicle.velocity : "Nieznane";
+                        var updateInfo = vehicle.updated_at ? new Date(vehicle.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : "Nieznane";
+                        marker.bindTooltip(
+                            `Następny Przystanek: ${nextStopInfo}
+                    <br>
+                    Kierunek: ${directionInfo}
+                    <br>
+                    Punktualność: ${puncInfo}
+                    <br>
+                    Prędkość: ${velInfo} km/h
+                    <br>
+                    Ostatnia Aktualizacja: ${updateInfo}`
+                        );
                     }
-
-                    // Utwórz znacznik z niestandardową ikoną dla każdego pojazdu
-                    var marker = L.marker([vehicle.latitude, vehicle.longitude], {
-                        icon: customIcon
-                    }).addTo(vehicleMarkers);
-
-                    // Dodaj podpowiedź lub komunikat do wyświetlenia dodatkowych informacji
-                    var nextStopInfo = vehicle.next_stop ? vehicle.next_stop : "Nieznane";
-                    var directionInfo = vehicle.direction ? vehicle.direction : "Nieznane";
-                    var puncInfo = vehicle.punctuality ? vehicle.punctuality : "Nieznane";
-                    var velInfo = vehicle.velocity ? vehicle.velocity : "Nieznane";
-                    var updateInfo = vehicle.updated_at ? new Date(vehicle.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : "Nieznane";
-                    marker.bindTooltip(
-                        `Następny Przystanek: ${nextStopInfo}
-                        <br>
-                        Kierunek: ${directionInfo}
-                        <br>
-                        Punktualność: ${puncInfo}
-                        <br>
-                        Prędkość: ${velInfo} km/h
-                        <br>
-                        Ostatnia Aktualizacja: ${updateInfo}`
-                    );
                 });
             }
         }
+
+
+        //------------------------------------------------------------------------------------------------------------------------------------
+        // 2. Markers for bus stops
+        //------------------------------------------------------------------------------------------------------------------------------------
 
 
         // Создание отдельного слоя для маркеров
@@ -364,7 +406,7 @@
                 const stopLatLng = L.latLng(stop.latitude, stop.longitude);
                 if (mapBounds.contains(stopLatLng)) {
                     const marker = L.marker(stopLatLng).addTo(busStopLayer);
-                    
+
                     marker.bindPopup(`
                 <div>
                     <p>Numer przystanku: ${stop.number}</p>
@@ -435,7 +477,106 @@
             }
         });
 
-        
+
+
+
+
+
+
+        // Функция для получения данных о линиях
+        async function fetchLinesData() {
+            const response = await fetch('https://www.zditm.szczecin.pl/api/v1/lines');
+            const data = await response.json();
+            return data.data;
+        }
+
+        async function createLineButtons() {
+            const linesData = await fetchLinesData();
+            const selectedLines = getSelectedLinesFromCookie();
+            const accordionBody = document.querySelector('.accordion-body');
+            document.getElementsByClassName('accordion-body').innerHTML = '';
+
+
+
+            linesData.forEach(line => {
+                const button = document.createElement('button');
+                button.classList.add('btn', 'btn-primary', 'mb-2');
+                button.textContent = `${line.number}`;
+                button.addEventListener('click', () => toggleLine(line.number));
+                if (selectedLines.includes(line.number)) {
+                    button.classList.add('btn-success'); // Подсвечиваем зеленым, если линия выбрана
+                } else {
+                    button.classList.add('btn-danger'); // Подсвечиваем красным, если линия не выбрана
+                }
+                accordionBody.appendChild(button);
+            });
+
+            // Добавляем кнопку "Включить все"
+            const enableAllButton = document.createElement('button');
+            enableAllButton.classList.add('btn', 'btn-primary', 'mb-2');
+            enableAllButton.textContent = 'Включить все';
+            enableAllButton.addEventListener('click', enableAllLines);
+            accordionBody.appendChild(enableAllButton);
+
+            // Добавляем кнопку "Выключить все"
+            const disableAllButton = document.createElement('button');
+            disableAllButton.classList.add('btn', 'btn-primary', 'mb-2', 'ms-2'); // Добавляем класс "ms-2" для отступа слева
+            disableAllButton.textContent = 'Выключить все';
+            disableAllButton.addEventListener('click', disableAllLines);
+            accordionBody.appendChild(disableAllButton);
+        }
+
+        // Функция для включения всех линий
+        async function enableAllLines() {
+            const linesData = await fetchLinesData();
+            const allLines = linesData.map(line => line.number); // Получаем массив всех номеров линий из API
+            saveSelectedLinesToCookie(allLines);
+            addVehicleMarkers();
+            document.getElementById('collapseOne').innerHTML = '<div class="accordion-body"></div>';
+            createLineButtons()
+        }
+        // Функция для выключения всех линий
+        function disableAllLines() {
+            saveSelectedLinesToCookie([]);
+            addVehicleMarkers();
+            document.getElementById('collapseOne').innerHTML = '<div class="accordion-body"></div>';
+            createLineButtons()
+        }
+
+        // Добавляем или удаляем линию из списка включенных линий и сохраняем его в куки
+        function toggleLine(lineNumber) {
+            const selectedLines = getSelectedLinesFromCookie();
+            if (selectedLines.includes(lineNumber)) {
+                const index = selectedLines.indexOf(lineNumber);
+                selectedLines.splice(index, 1);
+            } else {
+                selectedLines.push(lineNumber);
+            }
+            saveSelectedLinesToCookie(selectedLines);
+            // Обновляем маркеры на карте
+            addVehicleMarkers();
+            document.getElementById('collapseOne').innerHTML = '<div class="accordion-body"></div>';
+            createLineButtons()
+        }
+
+        // Вызываем функцию для создания кнопок при загрузке страницы
+        document.addEventListener('DOMContentLoaded', async () => {
+            await createLineButtons();
+            addVehicleMarkers();
+        });
+
+
+
+
+
+
+
+
+
+
+        //-------------------------------------------------------------------------------------------------------------------------------------
+
+
 
         // Wywołaj funkcje do początkowego dodawania znaczników pojazdów
         addVehicleMarkers();
@@ -443,8 +584,8 @@
         // Utwórz grupę warstw dla znaczników pojazdów
         var vehicleMarkers = L.layerGroup().addTo(map);
 
-        // Aktualizuj pozycje pojazdów co 20 sekund
-        setInterval(addVehicleMarkers, 20000);
+        // Aktualizuj pozycje pojazdów co 10 sekund
+        setInterval(addVehicleMarkers, 10000);
 
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
