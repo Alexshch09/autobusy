@@ -175,35 +175,6 @@
                         });
                     }
 
-                    // Add marker with custom icon for each vehicle
-                    L.marker([vehicle.latitude, vehicle.longitude], {
-                        icon: customIcon
-                    }).addTo(vehicleMarkers);
-                });
-            }
-        }
-
-        // Function to add markers for vehicles to the map
-        async function addVehicleMarkers() {
-            const vehicleData = await fetchVehicleData();
-            if (vehicleData) {
-                // Clear previous vehicle markers from the map
-                vehicleMarkers.clearLayers();
-
-                vehicleData.forEach(vehicle => {
-                    var customIcon;
-                    if (vehicle.vehicle_type === "bus") {
-                        customIcon = L.divIcon({
-                            className: 'bus-icon',
-                            html: `<div>${vehicle.line_number}</div>`
-                        });
-                    } else if (vehicle.vehicle_type === "tram") {
-                        customIcon = L.divIcon({
-                            className: 'tram-icon',
-                            html: `<div>${vehicle.line_number}</div>`
-                        });
-                    }
-
                     // Create marker with custom icon for each vehicle
                     var marker = L.marker([vehicle.latitude, vehicle.longitude], {
                         icon: customIcon
@@ -211,7 +182,21 @@
 
                     // Add tooltip or popup to show next stop information
                     var nextStopInfo = vehicle.next_stop ? vehicle.next_stop : "Unknown";
-                    marker.bindTooltip(`Next Stop: ${nextStopInfo}`);
+                    var directionInfo = vehicle.direction ? vehicle.direction : "Unknown";
+                    var puncInfo = vehicle.punctuality ? vehicle.punctuality : "Unknown";
+                    var velInfo = vehicle.velocity ? vehicle.velocity : "Unknown";
+                    var updateInfo = vehicle.updated_at ? new Date(vehicle.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : "Unknown";
+                    marker.bindTooltip(
+                        `Next Stop: ${nextStopInfo}
+                        <br>
+                        Direction: ${directionInfo}
+                        <br>
+                        Punctuality: ${puncInfo}
+                        <br>
+                        Velocity: ${velInfo} km/s
+                        <br>
+                        Last Update: ${updateInfo}`
+                    );
                     // If you want to use popup instead of tooltip, use marker.bindPopup() instead.
                 });
             }
