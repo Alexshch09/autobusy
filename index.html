@@ -270,6 +270,8 @@
 
 
 
+        var gpsLayer = L.layerGroup(); // Создаем слой для метки GPS
+
         function initMap() {
             // Check if geolocation is supported by the browser
             if ('geolocation' in navigator) {
@@ -290,9 +292,15 @@
                             iconSize: [16, 16], // Size of the icon
                         });
 
-                        // Add marker with custom icon
-                        L.marker([userLat, userLng], { icon: customIcon }).addTo(map)
+                        // Clear the GPS layer before adding new marker
+                        gpsLayer.clearLayers();
+
+                        // Add marker with custom icon to the GPS layer
+                        L.marker([userLat, userLng], { icon: customIcon }).addTo(gpsLayer)
                             .bindPopup('Your Location');
+
+                        // Add the GPS layer to the map
+                        gpsLayer.addTo(map);
                     },
                     // Error callback function
                     function (error) {
@@ -303,6 +311,7 @@
                 console.error('Geolocation is not supported by this browser.');
             }
         }
+
 
         // Call the initMap function when the page is loaded
         document.addEventListener('DOMContentLoaded', initMap);
