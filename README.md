@@ -19,7 +19,7 @@ Aplikacja jest oparta na technologiach:
 - JavaScript (Leaflet.js)
 
 ### Konfiguracja
-Aby uruchomić aplikację, otwórz plik `index.html` w przeglądarce internetowej, lub skorzystaj z [tego linku](https://alexshch09.github.io/autobusy/)
+Aby uruchomić aplikację, otwórz plik `index.html` w przeglądarce internetowej, lub skorzystaj z [tego linku](https://alexshch09.github.io/autobusy/), lub skorzystaj z [apk](https://github.com/Alexshch09/autobusy/releases/tag/v1.0.1)
 
 ### Ustawienia
 Po otwarciu aplikacji możesz dostosować ustawienia mapy poprzez kliknięcie na ikonę ustawień (prawy górny róg). Możesz wybrać typ mapy (Thunderforest lub OpenStreetMap) oraz wprowadzić klucz API, jeśli korzystasz z mapy Thunderforest.
