@@ -131,8 +131,27 @@
 
 
     <div style="height: 93vh;">
-        <div id="map" style="height: 100%;"></div>
+        <div id="map" style="height: 100%;">
+        </div>
     </div>
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            var d1 = document.getElementsByClassName('leaflet-control-container')[0];
+            d1 = d1.getElementsByClassName('leaflet-top leaflet-left')[0];
+
+            d1.insertAdjacentHTML('beforeend', `<div class="leaflet-bar leaflet-control leaflet-control-zoom" style="width: 34px;">
+        <a onclick="initMap()" aria-label="Update Location"
+            title="Update Location" type="button"
+            style="width:30px; height:30px; padding-top:1px; text-align: center; font-size:22px;">
+            <i class="fa-solid fa-location-crosshairs"></i>
+        </a>
+    </div>
+            `);
+        });
+
+    </script>
 
 
     <script>
@@ -165,6 +184,16 @@
 
                         // Initialize the map with the user's location
                         map.setView([userLat, userLng], 18);
+
+                        var customIcon = L.divIcon({
+                            className: 'custom-icon',
+                            html: '<i class="fa-solid fa-location-dot" style="color:blue; font-size:16px;"></i>',
+                            iconSize: [16, 16], // Size of the icon
+                        });
+
+                        // Add marker with custom icon
+                        L.marker([userLat, userLng], { icon: customIcon }).addTo(map)
+                            .bindPopup('Your Location');
                     },
                     // Error callback function
                     function (error) {
