@@ -333,17 +333,26 @@
             return [];
         }
 
-        // Функция для добавления маркеров для выбранных линий
         async function addVehicleMarkers() {
             const vehicleData = await fetchVehicleData();
-            const selectedLines = getSelectedLinesFromCookie();
+            let selectedLines = getSelectedLinesFromCookie();
+
+            // Если куки отсутствуют, установить selectedLines в пустой массив
+            if (!selectedLines) {
+                selectedLines = [];
+            }
 
             if (vehicleData) {
-                // Wyczyść poprzednie znaczniki pojazdów z mapy
+                // Очистка предыдущих маркеров с карты
                 vehicleMarkers.clearLayers();
 
+                if (!selectedLines.length) {
+                    document.getElementById('collapseOne').innerHTML = '<div class="accordion-body"></div>';
+                    enableAllLines();
+                }
+
                 vehicleData.forEach(vehicle => {
-                    // Проверяем, есть ли линия в списке включенных линий
+
                     if (selectedLines.includes(vehicle.line_number)) {
                         var customIcon;
                         if (vehicle.vehicle_type === "bus") {
@@ -363,39 +372,36 @@
                             icon: customIcon
                         }).addTo(vehicleMarkers);
 
-
-
                         marker.on('mouseover', function () {
-                            drawLineTrajectory(vehicle.line_id); // Zakładając, że funkcja drawVehicleRoute(id) rysuje trasę dla danego pojazdu na mapie
+                            drawLineTrajectory(vehicle.line_id);
                         });
 
                         marker.on('mouseout', function () {
-                            removeLineTrajectory(vehicle.line_id); // Zakładając, że funkcja drawVehicleRoute(id) rysuje trasę dla danego pojazdu na mapie
+                            removeLineTrajectory(vehicle.line_id);
                         });
 
-
-
                         // Добавляем всплывающую подсказку для отображения дополнительной информации
-                        var nextStopInfo = vehicle.next_stop ? vehicle.next_stop : "Nieznane";
-                        var directionInfo = vehicle.direction ? vehicle.direction : "Nieznane";
-                        var puncInfo = vehicle.punctuality ? vehicle.punctuality : "Nieznane";
-                        var velInfo = vehicle.velocity ? vehicle.velocity : "Nieznane";
-                        var updateInfo = vehicle.updated_at ? new Date(vehicle.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : "Nieznane";
+                        var nextStopInfo = vehicle.next_stop ? vehicle.next_stop : "Неизвестно";
+                        var directionInfo = vehicle.direction ? vehicle.direction : "Неизвестно";
+                        var puncInfo = vehicle.punctuality ? vehicle.punctuality : "Неизвестно";
+                        var velInfo = vehicle.velocity ? vehicle.velocity : "Неизвестно";
+                        var updateInfo = vehicle.updated_at ? new Date(vehicle.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : "Неизвестно";
                         marker.bindTooltip(
-                            `Następny Przystanek: ${nextStopInfo}
+                            `Следующая остановка: ${nextStopInfo}
                     <br>
-                    Kierunek: ${directionInfo}
+                    Направление: ${directionInfo}
                     <br>
-                    Punktualność: ${puncInfo}
+                    Пунктуальность: ${puncInfo}
                     <br>
-                    Prędkość: ${velInfo} km/h
+                    Скорость: ${velInfo} km/h
                     <br>
-                    Ostatnia Aktualizacja: ${updateInfo}`
+                    Последнее обновление: ${updateInfo}`
                         );
                     }
                 });
             }
         }
+
 
 
         //------------------------------------------------------------------------------------------------------------------------------------
