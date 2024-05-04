@@ -1,6 +1,8 @@
 
 # Autobusy Szczecin - Śledzenie Autobusów
 
+[Link do Aplikacji](https://alexshch09.github.io/autobusy/)
+
 ## Opis
 Ta aplikacja umożliwia śledzenie na żywo autobusów i tramwajów w Szczecinie. Wyświetla ich aktualne położenie na mapie w czasie rzeczywistym.
 
@@ -17,7 +19,7 @@ Aplikacja jest oparta na technologiach:
 - JavaScript (Leaflet.js)
 
 ### Konfiguracja
-Aby uruchomić aplikację, otwórz plik `index.html` w przeglądarce internetowej. 
+Aby uruchomić aplikację, otwórz plik `index.html` w przeglądarce internetowej, lub skorzystaj z [tego linku](https://alexshch09.github.io/autobusy/)
 
 ### Ustawienia
 Po otwarciu aplikacji możesz dostosować ustawienia mapy poprzez kliknięcie na ikonę ustawień (prawy górny róg). Możesz wybrać typ mapy (Thunderforest lub OpenStreetMap) oraz wprowadzić klucz API, jeśli korzystasz z mapy Thunderforest.
