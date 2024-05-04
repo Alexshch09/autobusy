@@ -524,7 +524,7 @@
                         }).addTo(vehicleMarkers);
 
                         marker.on('mouseover', function () {
-                            drawLineTrajectory(vehicle.line_id);
+                            drawLineTrajectory(vehicle.line_id, vehicle.route_variant_number);
                         });
 
                         marker.on('mouseout', function () {
@@ -835,7 +835,7 @@
         const lineTrajectoryLayer = L.layerGroup().addTo(map);
 
         // Funkcja do rysowania trasy linii na mapie
-        function drawLineTrajectory(lineId) {
+        function drawLineTrajectory(lineId, variant) {
             console.log(`Drawing line ${lineId}`)
             fetch(`https://www.zditm.szczecin.pl/api/v1/trajectories/${lineId}`)
                 .then(response => {
@@ -845,7 +845,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    const line = data.features.find(feature => feature.properties.route_variant_type === "default");
+                    const line = data.features.find(feature => feature.properties.route_variant_number === variant);
                     const coordinates = line.geometry.coordinates.map(coord => [coord[1], coord[0]]);
                     L.polyline(coordinates, { color: readColor('lineColor') }).addTo(lineTrajectoryLayer);
                 })
