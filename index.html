@@ -218,7 +218,11 @@
         function changeTileLayer(mapType) {
             if (mapType === "thunderforest") {
                 if (!apiKey) {
-                    alert("Proszę podać klucz API. Możesz go uzyskać na stronie Thunderforest.");
+                    swal({
+                        title: "Błąd API",
+                        text: "Proszę podać klucz API. Możesz go uzyskać na stronie Thunderforest.",
+                        icon: "error",
+                    });
                     return;
                 }
                 tileLayer = L.tileLayer('https://a.tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=' + apiKey, {
@@ -226,7 +230,11 @@
                 });
             } else if (mapType === "thunderforest_dark") {
                 if (!apiKey) {
-                    alert("Proszę podać klucz API. Możesz go uzyskać na stronie Thunderforest.");
+                    swal({
+                        title: "Błąd API",
+                        text: "Proszę podać klucz API. Możesz go uzyskać na stronie Thunderforest.",
+                        icon: "error",
+                    });
                     return;
                 }
                 tileLayer = L.tileLayer('https://a.tile.thunderforest.com/transport-dark/{z}/{x}/{y}.png?apikey=' + apiKey, {
@@ -354,6 +362,18 @@
                         var marker = L.marker([vehicle.latitude, vehicle.longitude], {
                             icon: customIcon
                         }).addTo(vehicleMarkers);
+
+
+
+                        marker.on('mouseover', function () {
+                            drawLineTrajectory(vehicle.line_id); // Zakładając, że funkcja drawVehicleRoute(id) rysuje trasę dla danego pojazdu na mapie
+                        });
+
+                        marker.on('mouseout', function () {
+                            removeLineTrajectory(vehicle.line_id); // Zakładając, że funkcja drawVehicleRoute(id) rysuje trasę dla danego pojazdu na mapie
+                        });
+
+
 
                         // Добавляем всплывающую подсказку для отображения дополнительной информации
                         var nextStopInfo = vehicle.next_stop ? vehicle.next_stop : "Nieznane";
@@ -484,6 +504,11 @@
                 fetchAndPopulateDepartures(stopNumber);
             }
         });
+
+
+
+
+
 
 
 
@@ -665,10 +690,62 @@
         // Aktualizuj pozycje pojazdów co 10 sekund
         setInterval(addVehicleMarkers, speed);
 
+
+
+
+        //-------------------------------------------------------------------------------------------------------------------------------------
+
+        // Funkcja do pobierania danych z API dla linii
+        async function fetchLinesData() {
+            try {
+                const response = await fetch('https://www.zditm.szczecin.pl/api/v1/lines');
+                const data = await response.json();
+                return data.data;
+            } catch (error) {
+                console.error('Błąd pobierania danych z API dotyczących linii:', error);
+                return [];
+            }
+        }
+
+        // Tworzenie warstwa dla trajektorii linii
+        const lineTrajectoryLayer = L.layerGroup().addTo(map);
+
+        // Funkcja do rysowania trasy linii na mapie
+        function drawLineTrajectory(lineId) {
+            console.log(`Drawing line ${lineId}`)
+            fetch(`https://www.zditm.szczecin.pl/api/v1/trajectories/${lineId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Wystąpił błąd podczas pobierania danych.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const line = data.features.find(feature => feature.properties.route_variant_type === "default");
+                    const coordinates = line.geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                    L.polyline(coordinates, { color: 'green' }).addTo(lineTrajectoryLayer);
+                })
+                .catch(error => {
+                    console.error('Błąd pobierania danych z API dotyczących trajektorii:', error);
+                    swal({
+                        title: "Błąd Serwera",
+                        text: `Błąd pobierania trajektorii dotyczących Linii`,
+                        icon: "error",
+                    });
+                });
+        }
+
+        // Funkcja do usuwania trajektorii linii
+        function removeLineTrajectory() {
+            lineTrajectoryLayer.clearLayers(); // Usuwa wszystkie warstwy z warstwy linii trajektorii
+        }
+
+
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
     <style>
         .bus-icon {
@@ -680,6 +757,7 @@
             width: 30px;
             height: 30px;
             line-height: 15px;
+            border: 1px solid black;
         }
 
         .tram-icon {
@@ -691,6 +769,7 @@
             width: 30px;
             height: 30px;
             line-height: 15px;
+            border: 1px solid black;
         }
 
         .bus-icon,
