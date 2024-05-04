@@ -209,15 +209,6 @@
         document.addEventListener('DOMContentLoaded', initMap);
 
 
-
-
-
-
-
-
-
-
-
         document.addEventListener("DOMContentLoaded", function () {
             const apiUrl = 'https://www.zditm.szczecin.pl/api/v1/timetable-change-descriptions';
 
@@ -381,12 +372,10 @@
             }
         }
 
-        // Функция для сохранения списка включенных линий в куки
         function saveSelectedLinesToCookie(selectedLines) {
             document.cookie = `selectedLines=${JSON.stringify(selectedLines)}; expires=${new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString()}; path=/`;
         }
 
-        // Функция для получения списка включенных линий из куки
         function getSelectedLinesFromCookie() {
             const cookies = document.cookie.split(';').map(cookie => cookie.trim());
             const selectedLinesCookie = cookies.find(cookie => cookie.startsWith('selectedLines='));
@@ -401,7 +390,7 @@
 
         async function createAllLines() {
             const linesData = await fetchLinesData();
-            const allLines = linesData.map(line => line.number); // Получаем массив всех номеров линий из API
+            const allLines = linesData.map(line => line.number);
             document.getElementById('collapseOne').innerHTML = '<div class="accordion-body"></div>';
             createLineButtons()
             saveSelectedLinesToCookie(allLines);
@@ -412,7 +401,6 @@
             let selectedLines = getSelectedLinesFromCookie();
 
             if (vehicleData) {
-                // Очистка предыдущих маркеров с карты
                 vehicleMarkers.clearLayers();
 
                 vehicleData.forEach(vehicle => {
@@ -517,17 +505,14 @@
             });
         }
 
-        // При изменении масштаба карты вызываем функцию для отображения видимых остановок
         map.on('zoomend', () => {
             renderVisibleBusStops(busStopsData);
         });
 
-        // Обновление видимых остановок при движении карты
         map.on('moveend', () => {
             renderVisibleBusStops(busStopsData);
         });
 
-        // Инициализация процесса получения данных об остановках и отображения их на карте
         let busStopsData = [];
         fetchBusStops().then(data => {
             busStopsData = data;
@@ -576,18 +561,6 @@
             }
         });
 
-
-
-
-
-
-
-
-
-
-
-
-        // Функция для получения данных о линиях
         async function fetchLinesData() {
             const response = await fetch('https://www.zditm.szczecin.pl/api/v1/lines');
             const data = await response.json();
@@ -609,25 +582,22 @@
             const br = document.createElement('br');
             tramsContainer.appendChild(br);
 
-            // Фильтруем данные на трамваи и автобусы
             const tramsData = linesData.filter(line => line.vehicle_type === 'tram');
             const dayBusesData = linesData.filter(line => line.vehicle_type === 'bus' && line.type === 'day');
             const nightBusesData = linesData.filter(line => line.vehicle_type === 'bus' && line.type === 'night');
 
-            // Создаем кнопки для трамваев
-            tramsContainer.classList.add('mb-3'); // Добавляем отступ для разделения кнопок
+            tramsContainer.classList.add('mb-3');
             const tramsTitle = document.createElement('h5');
             tramsTitle.textContent = 'Tramwaje:';
             tramsContainer.appendChild(tramsTitle);
             tramsData.forEach(line => {
                 const button = createButton(line, selectedLines);
-                button.classList.add('me-1', 'me-md-2'); // Добавляем минимальные отступы справа и слева для всех кнопок линий
+                button.classList.add('me-1', 'me-md-2');
                 button.setAttribute('id', `line_${line.number}`);
                 tramsContainer.appendChild(button);
             });
             accordionBody.appendChild(tramsContainer);
 
-            // Создаем кнопки для дневных автобусов
             const dayBusesContainer = document.createElement('div');
 
             const dayBusesTitle = document.createElement('h5');
@@ -635,14 +605,13 @@
             dayBusesContainer.appendChild(dayBusesTitle);
             dayBusesData.forEach(line => {
                 const button = createButton(line, selectedLines);
-                button.classList.add('me-1', 'me-md-2'); // Добавляем минимальные отступы справа и слева для всех кнопок линий
+                button.classList.add('me-1', 'me-md-2');
                 button.setAttribute('id', `line_${line.number}`);
                 dayBusesContainer.appendChild(button);
             });
 
             accordionBody.appendChild(dayBusesContainer);
 
-            // Создаем кнопки для ночных автобусов
             const nightBusesContainer = document.createElement('div');
 
             const nightBusesTitle = document.createElement('h5');
@@ -650,7 +619,7 @@
             nightBusesContainer.appendChild(nightBusesTitle);
             nightBusesData.forEach(line => {
                 const button = createButton(line, selectedLines);
-                button.classList.add('me-1', 'me-md-2'); // Добавляем минимальные отступы справа и слева для всех кнопок линий
+                button.classList.add('me-1', 'me-md-2');
                 button.setAttribute('id', `line_${line.number}`);
                 nightBusesContainer.appendChild(button);
             });
@@ -660,47 +629,41 @@
             const hr = document.createElement('hr');
             accordionBody.appendChild(hr);
 
-            // Добавляем кнопку "Włącz wszystko"
             const enableAllButton = document.createElement('button');
-            enableAllButton.classList.add('btn', 'btn-primary', 'mb-2', 'me-1', 'me-md-2'); // Добавляем минимальные отступы справа и слева для кнопки
+            enableAllButton.classList.add('btn', 'btn-primary', 'mb-2', 'me-1', 'me-md-2');
             enableAllButton.textContent = 'Włącz Wszystko';
             enableAllButton.addEventListener('click', enableAllLines);
             accordionBody.appendChild(enableAllButton);
 
-            // Добавляем кнопку "Wyłącz wszystko"
             const disableAllButton = document.createElement('button');
-            disableAllButton.classList.add('btn', 'btn-primary', 'mb-2', 'ms-2'); // Добавляем класс "ms-2" для отступа слева
+            disableAllButton.classList.add('btn', 'btn-primary', 'mb-2', 'ms-2');
             disableAllButton.textContent = 'Wyłącz Wszystko';
             disableAllButton.addEventListener('click', disableAllLines);
             accordionBody.appendChild(disableAllButton);
         }
 
-
-
-        // Создаем кнопку для линии
         function createButton(line, selectedLines) {
             const button = document.createElement('button');
             button.classList.add('btn', 'btn-primary', 'mb-2');
             button.textContent = `${line.number}`;
             button.addEventListener('click', () => toggleLine(line.number));
             if (selectedLines.includes(line.number)) {
-                button.classList.add('btn-success'); // Подсвечиваем зеленым, если линия выбрана
+                button.classList.add('btn-success');
             } else {
-                button.classList.add('btn-danger'); // Подсвечиваем красным, если линия не выбрана
+                button.classList.add('btn-danger');
             }
             return button;
         }
 
-        // Функция для включения всех линий
         async function enableAllLines() {
             const linesData = await fetchLinesData();
-            const allLines = linesData.map(line => line.number); // Получаем массив всех номеров линий из API
+            const allLines = linesData.map(line => line.number);
             saveSelectedLinesToCookie(allLines);
             addVehicleMarkers();
             document.getElementById('collapseOne').innerHTML = '<div class="accordion-body"></div>';
             createLineButtons()
         }
-        // Функция для выключения всех линий
+
         function disableAllLines() {
             saveSelectedLinesToCookie([]);
             addVehicleMarkers();
@@ -708,7 +671,6 @@
             createLineButtons()
         }
 
-        // Добавляем или удаляем линию из списка включенных линий и сохраняем его в куки
         function toggleLine(lineNumber) {
             const selectedLines = getSelectedLinesFromCookie();
             if (selectedLines.includes(lineNumber)) {
@@ -718,7 +680,6 @@
                 selectedLines.push(lineNumber);
             }
             saveSelectedLinesToCookie(selectedLines);
-            // Обновляем маркеры на карте
             addVehicleMarkers();
 
             if (document.getElementById(`line_${lineNumber}`).classList.contains('btn-danger')) {
@@ -734,18 +695,10 @@
             // createLineButtons()
         }
 
-        // Вызываем функцию для создания кнопок при загрузке страницы
         document.addEventListener('DOMContentLoaded', async () => {
             await createLineButtons();
             addVehicleMarkers();
         });
-
-
-
-
-
-
-
 
 
 
