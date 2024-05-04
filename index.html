@@ -606,13 +606,17 @@
                 if (mapBounds.contains(stopLatLng)) {
                     const marker = L.marker(stopLatLng).addTo(busStopLayer);
 
-                    marker.bindPopup(`
+                    marker.bindTooltip(`
                 <div>
                     <p>Numer przystanku: ${stop.number}</p>
                     <p>Na żądanie: ${stop.request_stop ? 'Tak' : 'Nie'}</p>
                     <p>Parking: ${stop.park_and_ride ? 'Tak' : 'Nie'}</p>
-                    <button type="button" id="open_stop_modal" class="btn btn-primary" data-bs-toggle="modal" data-stop-number="${stop.number}" data-bs-target="#departureModal">Pokaż odjazdy</button>
-                </div>`);
+                    <button type="button" id="open_stop_modal" class="btn btn-primary" data-bs-toggle="modal" data-stop-number="${stop.number}" style="display: none;" data-bs-target="#departureModal">Pokaż odjazdy</button>
+                </div>`).on('click', function () {
+                        fetchAndPopulateDepartures(stop.number);
+                        const modalButton = document.getElementById('open_stop_modal');
+                        modalButton.click();
+                    });;
                 }
             });
         }
@@ -672,6 +676,7 @@
                 fetchAndPopulateDepartures(stopNumber);
             }
         });
+
 
         async function fetchLinesData() {
             const response = await fetch('https://www.zditm.szczecin.pl/api/v1/lines');
