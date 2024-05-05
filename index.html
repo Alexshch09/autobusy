@@ -113,7 +113,9 @@
                                                 (Potrzebujesz klucza API)
                                             </label><br>
                                         </div>
-                                        <div id="hiddenContainer" style="display:none;">
+                                        <div id="hiddenContainer"
+                                            style="display:none; background-color: rgba(255, 0, 0, 0.527); border-radius: 10%; padding: 50px;">
+                                            <h5>Easter Egg: </h5>
                                             <label>
                                                 <input type="radio" name="mapType" value="thunderforest_pioneer">
                                                 Thunderforest Pioneer
@@ -223,7 +225,7 @@
         <div id="map" style="height: 100%;">
         </div>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
     <script>
@@ -231,12 +233,48 @@
         const codeIcon = document.getElementById('codeIcon');
         const hiddenContainer = document.getElementById('hiddenContainer');
 
+
+        const rhythmPattern = [380, 480, 460, 250, 228, 420, 240, 180, 270, 500, 260];
+
+        let clickIndex = 0;
+        let lastClickTime = 0;
+
         codeIcon.addEventListener('click', function () {
-            clickCount++;
-            if (clickCount >= 5) {
-                hiddenContainer.style.display = 'block';
+            let currentTime = new Date().getTime();
+            let timeDiff = currentTime - lastClickTime;
+            console.log(timeDiff);
+
+            if (clickIndex === 0) {
+                clickIndex++;
+                console.log(clickIndex);
+                lastClickTime = currentTime;
+                return;
+            }
+
+            if (timeDiff >= rhythmPattern[clickIndex] && timeDiff <= rhythmPattern[clickIndex] + 200) {
+                clickIndex++;
+                console.log(clickIndex);
+
+                if (clickIndex === 11) {
+                    Swal.fire({
+                        title: "EASTER EGG!",
+                        text: `Znalazłeś Easter Egg! 😊
+                Odblokowałeś dwa nowe typy mapy. 🗺️`,
+                        imageUrl: "https://i.pinimg.com/originals/c4/cf/26/c4cf2601c4e2578ee04c1a1f99a26fda.jpg",
+                        imageWidth: 400,
+                        imageHeight: 400
+                    });
+                    hiddenContainer.style.display = 'block';
+                    clickIndex = 0;
+                }
+
+                lastClickTime = currentTime;
+            } else {
+                clickIndex = 0;
+                lastClickTime = currentTime;
             }
         });
+
     </script>
 
     <script>
