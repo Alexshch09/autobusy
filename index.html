@@ -172,6 +172,21 @@
     </div>
 
     <script>
+        function areCookiesEnabled() {
+            document.cookie = "testCookie=testValue";
+            var cookieEnabled = document.cookie.indexOf("testCookie=testValue") !== -1;
+            document.cookie = "testCookie=testValue; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+
+            return cookieEnabled;
+        }
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            if (!areCookiesEnabled()) {
+                alert("Proszę włączyć obsługę plików cookie w ustawieniach przeglądarki, aby uzyskać dostęp do tej witryny.");
+                window.close();
+            }
+        });
+
 
         document.addEventListener("DOMContentLoaded", async function () {
             var d1 = document.getElementsByClassName('leaflet-control-container')[0];
