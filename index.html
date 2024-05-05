@@ -255,14 +255,19 @@
                 clickIndex++;
                 console.log(clickIndex);
 
-                if (clickIndex === 11) {
+                if (clickIndex === 2) {
                     Swal.fire({
                         title: "EASTER EGG!",
-                        text: `Znalazłeś Easter Egg! 😊
-                Odblokowałeś dwa nowe typy mapy. 🗺️`,
+                        text: "Znalazłeś Easter Egg! 😊 Odblokowałeś dwa nowe typy mapy. 🗺️",
                         imageUrl: "https://i.pinimg.com/originals/c4/cf/26/c4cf2601c4e2578ee04c1a1f99a26fda.jpg",
                         imageWidth: 400,
-                        imageHeight: 400
+                        imageHeight: 400,
+                        backdrop: `
+        rgba(0,0,123,0.4)
+        url("https://www.icegif.com/wp-content/uploads/2023/06/icegif-326.gif")
+        center center
+        no-repeat
+    `
                     });
                     hiddenContainer.style.display = 'block';
                     clickIndex = 0;
