@@ -303,7 +303,7 @@
 
                         var customIcon = L.divIcon({
                             className: 'custom-icon',
-                            html: `<i class="fa-solid fa-location-dot" style="color:${readColor('gpsColor')}; font-size:16px;"></i>`,
+                            html: `<i class="fa-solid fa-location-dot slow-beat" style="color:${readColor('gpsColor')}; font-size:16px;"></i>`,
                             iconSize: [16, 16], // Size of the icon
                         });
 
@@ -975,6 +975,11 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+        }
+
+        .slow-beat {
+            -webkit-animation: fa-beat 3s infinite linear;
+            animation: fa-beat 3s infinite linear;
         }
     </style>
 </body>
