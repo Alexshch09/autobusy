@@ -60,21 +60,71 @@
                             <div id="collapseThree" class="accordion-collapse collapse"
                                 data-bs-parent="#accordionExample">
                                 <div class="accordion-body">
-                                    <!-- Przyciski wyboru typu mapy -->
+                                    <!-- Przyciskи wyboru typu mapy -->
                                     <div>
                                         <h6>Wybierz Typ Mapy: </h6>
                                         <label>
-                                            <input type="radio" name="mapType" value="thunderforest"> Vehicles Light
-                                            (Potrzebujesz klucza API)
-                                        </label><br>
-                                        <label>
-                                            <input type="radio" name="mapType" value="thunderforest_dark"> Vehicles Dark
+                                            <input type="radio" name="mapType" value="thunderforest_transport"> Vehicles
+                                            Light
                                             (Potrzebujesz klucza API)
                                         </label><br>
                                         <label>
                                             <input type="radio" name="mapType" value="osm" checked> OpenStreetMap
                                         </label><br>
-
+                                        <div id="advancedModeToggle">
+                                            <input type="checkbox" id="advancedModeCheckbox"
+                                                onchange="toggleAdvancedMode()">
+                                            <label for="advancedModeCheckbox">Rozszerzony tryb</label>
+                                        </div>
+                                        <div id="advancedOptions" style="display:none;">
+                                            <label>
+                                                <input type="radio" name="mapType" value="thunderforest_transportdark">
+                                                Thunderforest Vehicles Dark
+                                                (Potrzebujesz klucza API)
+                                            </label><br>
+                                            <label>
+                                                <input type="radio" name="mapType" value="thunderforest_landscape">
+                                                Thunderforest Landscape
+                                                (Potrzebujesz klucza API)
+                                            </label><br>
+                                            <label>
+                                                <input type="radio" name="mapType" value="thunderforest_outdoors">
+                                                Thunderforest Outdoors
+                                                (Potrzebujesz klucza API)
+                                            </label><br>
+                                            <label>
+                                                <input type="radio" name="mapType" value="thunderforest_cycle">
+                                                Thunderforest OpenCycleMap
+                                                (Potrzebujesz klucza API)
+                                            </label><br>
+                                            <label>
+                                                <input type="radio" name="mapType" value="thunderforest_mobile-atlas">
+                                                Thunderforest Mobile Atlas
+                                                (Potrzebujesz klucza API)
+                                            </label><br>
+                                            <label>
+                                                <input type="radio" name="mapType" value="thunderforest_neighbourhood">
+                                                Thunderforest Neighbourhood
+                                                (Potrzebujesz klucza API)
+                                            </label><br>
+                                            <label>
+                                                <input type="radio" name="mapType" value="thunderforest_atlas">
+                                                Thunderforest Atlas
+                                                (Potrzebujesz klucza API)
+                                            </label><br>
+                                        </div>
+                                        <div id="hiddenContainer" style="display:none;">
+                                            <label>
+                                                <input type="radio" name="mapType" value="thunderforest_pioneer">
+                                                Thunderforest Pioneer
+                                                (Potrzebujesz klucza API)
+                                            </label><br>
+                                            <label>
+                                                <input type="radio" name="mapType" value="thunderforest_spinal">
+                                                Thunderforest Spinal Map
+                                                (Potrzebujesz klucza API)
+                                            </label><br>
+                                        </div>
                                     </div>
                                     <br>
                                     <!-- Pole wprowadzania klucza API -->
@@ -120,14 +170,17 @@
 
                                     <br>
                                     <hr><br>
-                                    <div>Ta aplikacja zapewnia śledzenie na żywo autobusów i tramwajów w
-                                        Szczecinie.<br><br>Dla więcej
-                                        informacji lub aby przyczynić się, odwiedź: <br> <a
+                                    <div>Ta aplikacja zapewnia śledzenie na żywo autobusów i tramwajów w Szczecinie.
+                                        <br><br>
+                                        <center><i class="fa-solid fa-code" id="codeIcon"></i></center><br>
+                                        Dla więcej informacji lub aby przyczynić się, odwiedź: <br> <a
                                             href="https://github.com/Alexshch09/autobusy"
-                                            target="_blank">https://github.com/Alexshch09/autobusy</a></div>
+                                            target="_blank">https://github.com/Alexshch09/autobusy</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -171,7 +224,35 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
     <script>
+        let clickCount = 0;
+        const codeIcon = document.getElementById('codeIcon');
+        const hiddenContainer = document.getElementById('hiddenContainer');
+
+        codeIcon.addEventListener('click', function () {
+            clickCount++;
+            if (clickCount >= 5) {
+                hiddenContainer.style.display = 'block';
+            }
+        });
+    </script>
+
+    <script>
+
+        function toggleAdvancedMode() {
+            const advancedOptions = document.getElementById('advancedOptions');
+            const advancedModeCheckbox = document.getElementById('advancedModeCheckbox');
+            if (advancedModeCheckbox.checked) {
+                advancedOptions.style.display = 'block';
+            } else {
+                advancedOptions.style.display = 'none';
+            }
+        }
+
+
+
         function areCookiesEnabled() {
             document.cookie = "testCookie=testValue";
             var cookieEnabled = document.cookie.indexOf("testCookie=testValue") !== -1;
@@ -279,6 +360,7 @@
 
         var mapType = getSavedMapType() || "osm";
         var apiKey = getSavedApiKey();
+        console.log(apiKey)
 
 
         //-------------------------------------------------------------------------------------------------------------------------------------
@@ -393,46 +475,52 @@
         changeTileLayer(mapType);
 
         function changeTileLayer(mapType) {
-            if (mapType === "thunderforest") {
+            const thunderforestMaps = {
+                "cycle": "cycle",
+                "transport": "transport",
+                "landscape": "landscape",
+                "outdoors": "outdoors",
+                "transportdark": "transport-dark",
+                "spinal": "spinal-map",
+                "pioneer": "pioneer",
+                "mobile-atlas": "mobile-atlas",
+                "neighbourhood": "neighbourhood",
+                "atlas": "atlas"
+            };
+
+            let tileUrl;
+            if (mapType.startsWith("thunderforest")) {
+                const mapName = mapType.split("_")[1];
                 if (!apiKey) {
                     swal({
                         title: "Błąd API",
                         text: "Proszę podać klucz API. Możesz go uzyskać na stronie Thunderforest.",
                         icon: "error",
                     });
-                    return;
+                    tileUrl = `https://tile.thunderforest.com/${thunderforestMaps[mapName]}/{z}/{x}/{y}.png`;
+                } else {
+                    tileUrl = `https://tile.thunderforest.com/${thunderforestMaps[mapName]}/{z}/{x}/{y}.png?apikey=${apiKey}`;
                 }
-                tileLayer = L.tileLayer('https://a.tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=' + apiKey, {
-                    maxZoom: 19,
-                });
-            } else if (mapType === "thunderforest_dark") {
-                if (!apiKey) {
-                    swal({
-                        title: "Błąd API",
-                        text: "Proszę podać klucz API. Możesz go uzyskać na stronie Thunderforest.",
-                        icon: "error",
-                    });
-                    return;
-                }
-                tileLayer = L.tileLayer('https://a.tile.thunderforest.com/transport-dark/{z}/{x}/{y}.png?apikey=' + apiKey, {
-                    maxZoom: 19,
-                });
-            }
-            else if (mapType === "osm") {
-                tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                });
+            } else if (mapType === "osm") {
+                tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
             }
 
-            map.eachLayer(function (layer) {
-                if (layer instanceof L.TileLayer) {
-                    map.removeLayer(layer);
-                }
-            });
+            if (tileUrl) {
+                tileLayer = L.tileLayer(tileUrl, {
+                    maxZoom: 19,
+                });
 
-            tileLayer.addTo(map);
-            document.querySelector('input[name="mapType"][value="' + mapType + '"]').checked = true;
+                map.eachLayer(function (layer) {
+                    if (layer instanceof L.TileLayer) {
+                        map.removeLayer(layer);
+                    }
+                });
+
+                tileLayer.addTo(map);
+                document.querySelector('input[name="mapType"][value="' + mapType + '"]').checked = true;
+            }
         }
+
 
 
 
@@ -903,7 +991,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
     <style>
         .bus-icon {
